@@ -1,0 +1,6 @@
+name: "Amogus",
+author: "Xusk",
+description: "Amogus",
+version: 0.1
+main: "Amogus.MainX",
+
