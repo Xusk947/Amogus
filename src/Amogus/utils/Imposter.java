@@ -41,6 +41,7 @@ public class Imposter extends PlayerData {
                     for (int i = 0; i < 15; i++) {
                         Call.effect(Fx.bubble, crewmate.player.x, crewmate.player.y, 0, Color.red);
                     }
+                    time = KILL_TIMER;
                 }
             }
         }

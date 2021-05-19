@@ -7,9 +7,11 @@ import Amogus.utils.Crewmate;
 import Amogus.utils.DeadBody;
 import Amogus.utils.Imposter;
 import Amogus.utils.PlayerData;
+import Amogus.utils.Speed;
 import Amogus.utils.StateX;
 import arc.struct.Seq;
 import arc.util.Interval;
+import arc.util.Log;
 import arc.util.Timer;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -29,6 +31,8 @@ public class Level implements StateX {
 
     public String name;
 
+    public Speed speed = Speed.NORMAL;
+
     public boolean gameStarted = false;
     public boolean discussion = false;
 
@@ -39,6 +43,8 @@ public class Level implements StateX {
 
     public Seq<PlayerData> datas;
     public Seq<Door> doors;
+
+    public int skip = 0;
 
     Interval interval;
 
@@ -101,7 +107,7 @@ public class Level implements StateX {
                 if (discussion) {
                     if (interval.get(0, 60f)) {
                         time = time - 1;
-                        Call.setHudText("[accent][DISCUSSION" + Math.floor(time) + "]");
+                        Call.setHudText("[accent][ DISCUSSION " + Math.floor(time) + " ]");
                         if (time < 1) {
                             endDiscussion();
                         }
@@ -127,7 +133,16 @@ public class Level implements StateX {
     public void onStart() {
         for (PlayerData data : datas) {
             if (Team.sharded.core() != null) {
-                data.player.unit(UnitTypes.crawler.spawn(Team.sharded, Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4));
+                Unit unit = Nulls.unit;
+                if (speed == Speed.FAST) {
+                    unit = UnitTypes.dagger.spawn(Team.sharded, Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4);
+                    unit.type = UnitTypes.flare;
+                } else if (speed == Speed.NORMAL) {
+                    unit = UnitTypes.crawler.spawn(Team.sharded, Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4);
+                }
+                unit.ammo = 0;
+                data.player.unit(unit);
+                data.id = data.player.team().id;
             }
         }
 
@@ -152,6 +167,8 @@ public class Level implements StateX {
             data.player.unit(Nulls.unit);
             unit.set(Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4);
             data.player.unit(unit);
+
+            data.player.name = "[#" + Team.get(data.id).color.toString() + "]" + data.id;
         }
         discussion = true;
         configDoors(false);
@@ -162,10 +179,35 @@ public class Level implements StateX {
             door.tile.build.configure(config);
         }
     }
-    
+
     public void endDiscussion() {
+        if (PlayerData.ALL.size > 0) {
+            PlayerData most = PlayerData.ALL.get(0);
+            for (PlayerData data : PlayerData.ALL) {
+                if (data.votes > most.votes) {
+                    most = data;
+                }
+                Log.info(data.votes + " : " + most.votes);
+            }
+            if (most.votes > skip) {
+                most.clear();
+            } else {
+                skip();
+            }
+            for (PlayerData data : PlayerData.ALL) {
+                data.player.name = "[black][]";
+                data.votes = 0;
+                data.hasVoted = false;
+            }
+        }
+        Call.hideHudText();
         time = DISCUSSION_TIME;
         discussion = false;
-        configDoors(false);
+        configDoors(true);
+        skip = 0;
+    }
+
+    public void skip() {
+        Call.sendMessage("[white]Skipped", "Amogus", Nulls.player);
     }
 }

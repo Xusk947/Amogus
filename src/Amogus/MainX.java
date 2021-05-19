@@ -5,6 +5,7 @@ import arc.Events;
 import arc.graphics.Color;
 import arc.struct.IntMap;
 import arc.util.CommandHandler;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.content.UnitTypes;
 import mindustry.game.EventType;
@@ -12,6 +13,7 @@ import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
+import mindustry.gen.Nulls;
 import mindustry.gen.Player;
 import mindustry.mod.Plugin;
 
@@ -39,6 +41,7 @@ public class MainX extends Plugin {
         rules.fire = false;
         rules.unitDamageMultiplier = 0;
         rules.blockDamageMultiplier = 0;
+        rules.unitAmmo = true;
 
         lobby = new Rules();
         lobby.enemyLights = true;
@@ -59,13 +62,33 @@ public class MainX extends Plugin {
         Vars.netServer.admins.addChatFilter((player, message) -> null);
 
         Events.on(EventType.PlayerChatEvent.class, e -> {
-            if (NAMES.containsKey(e.player.id)) {
+            // Vote session because ClientComandHandler is Broken  lol
+            if (e.message.startsWith("vote") && Game.ME.level.discussion && PlayerData.ALL.contains(d -> d.player.id == e.player.id) && !PlayerData.ALL.find(d -> d.player.id == e.player.id).hasVoted) {
+                String[] s = e.message.split(" ");
+                if (s.length > 1) {
+                    PlayerData data = PlayerData.ALL.find(d -> d.id == Integer.valueOf(s[1]));
+                    if (data != null && !data.dead && !PlayerData.ALL.find(d -> d.player.id == e.player.id).dead) {
+                        data.votes++;
+                        Log.info(data.votes);
+                        PlayerData.ALL.find(d -> d.player.id == e.player.id).hasVoted = true;
+                        Call.sendMessage("[white] vote to: " + NAMES.get(data.player.id) + " [#" + Team.get(data.id).color.toString() + "]" + data.id, NAMES.get(e.player.id) + " [#" + Team.get(e.player.team().id).color.toString() + "]" + e.player.team().id, Nulls.player);
+                    } else if (!PlayerData.ALL.find(d -> d.player.id == e.player.id).dead) {
+                        Call.sendMessage(e.player.con, "Can't find player with: " + s[1], "Amogus", Nulls.player);
+                    } else {
+                        Call.sendMessage(e.player.con, "You [crimson]DED: " + s[1], "Amogus", Nulls.player);
+
+                    }
+                }
+            } else if (e.message.startsWith("skip")) {
+
+            } else if (NAMES.containsKey(e.player.id)) {
                 String n = "[white]" + NAMES.get(e.player.id);
                 if (Game.ME.state == Game.State.Game) {
                     if (PlayerData.ALL.contains(d -> d.player.id == e.player.id)) {
-                        if (Game.ME.level.discussion) {
-                            Call.sendMessage(e.message, n, e.player);
-                        } else if (PlayerData.ALL.find(d -> d.player.id == e.player.id).dead) {
+                        PlayerData data = PlayerData.ALL.find(d -> d.player.id == e.player.id);
+                        if (Game.ME.level.discussion && !data.dead) {
+                            Call.sendMessage(e.message, n + " [#" + Team.get(data.id).color.toString() + "]" + data.id, e.player);
+                        } else if (data.dead) {
                             Call.sendMessage(e.player.con(), e.message, "[gray][S] " + n, e.player);
                         }
                     } else {
@@ -103,12 +126,6 @@ public class MainX extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
-        handler.<Player>register("info", "Info for [red]Amogus", (args, player) -> {
-            player.sendMessage("");
-        });
-        handler.<Player>register("inforu", "Инфо по [red]Амогус", (args, player) -> {
-            player.sendMessage("");
-        });
     }
 
     public void loadMaps() {

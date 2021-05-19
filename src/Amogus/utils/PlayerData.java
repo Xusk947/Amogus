@@ -1,13 +1,17 @@
 package Amogus.utils;
 
 import Amogus.Game;
+import Amogus.MainX;
+import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.struct.Seq;
 import arc.util.Interval;
-import arc.util.Time;
 import mindustry.Vars;
+import mindustry.content.Fx;
 import mindustry.gen.Call;
+import mindustry.gen.Nulls;
 import mindustry.gen.Player;
+import mindustry.gen.Unit;
 
 public abstract class PlayerData {
 
@@ -17,7 +21,10 @@ public abstract class PlayerData {
     public final String name;
     public Player player;
     public boolean dead = false;
-    
+    public boolean hasVoted = false;
+    public int id;
+    public int votes = 0;
+
     Interval bodyInterval;
 
     public PlayerData(Player player) {
@@ -48,5 +55,17 @@ public abstract class PlayerData {
             }
         }
     }
-;
+    
+    public void clear() {
+        if (player.unit() != null) {
+            Unit unit = player.unit();
+            Call.effect(Fx.impactcloud, unit.x, unit.y, 0, Color.clear);
+            Call.label(MainX.NAMES.get(player.id) + "[white] : was " + ((this instanceof Imposter) ? "[red]Imposter" : "[accent]Crewmate"), 3, unit.x, unit.y);
+            player.clearUnit();
+            unit.set(0, 0);
+            unit.kill();
+            player.unit(Nulls.unit);
+            Call.setRules(player.con, MainX.lobby);
+        }
+    }
 }
