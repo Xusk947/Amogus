@@ -1,14 +1,19 @@
 package Amogus.process;
 
-import Amogus.utils.PlayerData;
+import Amogus.utils.Crewmate;
+import mindustry.world.Tile;
 
-public class TaskX {
+public abstract class TaskX {
     
-    public TaskX() {
-        
+    public Tile tile;
+    
+    public TaskX(Tile tile) {
+        this.tile = tile;
     }
     
-    public void update(PlayerData data) {
-        
-    }
+    public abstract void update(Crewmate data);
+    
+    public abstract void onStart(Crewmate data);
+
+    public abstract TaskX start();
 }

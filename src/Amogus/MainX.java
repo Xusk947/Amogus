@@ -1,12 +1,17 @@
 package Amogus;
 
+import Amogus.process.TaskX;
+import Amogus.utils.Crewmate;
 import Amogus.utils.PlayerData;
+import Amogus.utils.XCoreNet;
+import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
 import arc.struct.IntMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.content.UnitTypes;
 import mindustry.game.EventType;
 import mindustry.game.Rules;
@@ -50,6 +55,9 @@ public class MainX extends Plugin {
         lobby.blockDamageMultiplier = 0f;
 
         Events.on(EventType.ServerLoadEvent.class, e -> {
+            Core.app.removeListener(Vars.netServer);
+            Vars.netServer = new XCoreNet();
+            Core.app.addListener(Vars.netServer);
             loadMaps();
             game.lobby.go();
             Vars.netServer.openServer();
@@ -121,6 +129,21 @@ public class MainX extends Plugin {
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             UnitTypes.crawler.weapons.clear();
+        });
+
+        Events.on(EventType.ConfigEvent.class, e -> {
+            if (e.player == null) return;
+            if (Game.ME.state == Game.State.Game && Crewmate.ALL.contains(c -> c.player.id() == e.player.id()) && e.tile != null && e.tile.block == Blocks.switchBlock) {
+                if (Game.ME.level.tasks.contains(t -> t.tile.build.equals(e.tile))) {
+                    Log.info(e.tile.tileX() + " : " + e.tile.tileY());
+                    TaskX task = Game.ME.level.tasks.find(t -> t.tile.build.equals(e.tile));
+                    int tx = e.player.unit().tileX(), ty = e.player.unit().tileY();
+                    if (tx >= e.tile.tileX() - 2 && ty >= e.tile.tileY() - 2 && tx <= e.tile.tileX() + 2 && ty <= e.tile.tileY() + 2) {
+                        Call.label(e.player.con, "[accent]Task started", 1, task.tile.drawx(), task.tile.drawy());
+                        Crewmate.ALL.find(c -> c.player.id == e.player.id).currentTask = task.start();
+                    }
+                }
+            }
         });
     }
 

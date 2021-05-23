@@ -1,7 +1,9 @@
 package Amogus.game;
 
 import Amogus.Game;
+import Amogus.process.tasks.WirelessTask;
 import Amogus.utils.PlayerData;
+import mindustry.Vars;
 
 public class TheShield extends Level {
 
@@ -23,4 +25,10 @@ public class TheShield extends Level {
         super.cons(data);
     }
 
+    @Override
+    public void genTiles() {
+        super.genTiles();
+        tasks.add(new WirelessTask(Vars.world.tile(53, 49)));
+        tasks.add(new WirelessTask(Vars.world.tile(78, 47)));
+    }
 }

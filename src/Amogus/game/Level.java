@@ -3,6 +3,7 @@ package Amogus.game;
 import Amogus.Game;
 import Amogus.MainX;
 import Amogus.process.Door;
+import Amogus.process.TaskX;
 import Amogus.utils.Crewmate;
 import Amogus.utils.DeadBody;
 import Amogus.utils.Imposter;
@@ -43,6 +44,7 @@ public class Level implements StateX {
 
     public Seq<PlayerData> datas;
     public Seq<Door> doors;
+    public Seq<TaskX> tasks;
 
     public int skip = 0;
 
@@ -59,6 +61,7 @@ public class Level implements StateX {
         Seq<Player> players = new Seq<>();
         datas = new Seq<>();
         doors = new Seq<>();
+        tasks = new Seq<>();
         discussion = false;
         gameStarted = false;
         time = DISCUSSION_TIME;
@@ -70,13 +73,14 @@ public class Level implements StateX {
 
         Call.worldDataBegin();
         Vars.world.loadMap(Vars.maps.byName(name));
+        genTiles();
         Vars.state.rules = MainX.rules.copy();
 
         Vars.logic.play();
 
         for (Player player : players) {
             Vars.netServer.sendWorldData(player);
-            if (imposters < needImposters) {
+            if (imposters < 1 /* needImposters */ ) {
                 datas.add(new Imposter(player));
                 imposters++;
             } else {
@@ -145,19 +149,6 @@ public class Level implements StateX {
                 data.id = data.player.team().id;
             }
         }
-
-        for (Tile tile : Vars.world.tiles) {
-            if (tile.build != null && tile.isCenter()) {
-
-                if (tile.build.block == Blocks.doorLarge) {
-                    doors.add(new Door(tile));
-                    tile.build.configure(true);
-                } else if (tile.build.block == Blocks.shockMine) {
-                    tile.build.kill();
-                    tile.setFloorNet(Blocks.darkPanel1);
-                }
-            }
-        }
     }
 
     public void reportBody(PlayerData reporter) {
@@ -177,6 +168,21 @@ public class Level implements StateX {
     public void configDoors(boolean config) {
         for (Door door : doors) {
             door.tile.build.configure(config);
+        }
+    }
+
+    public void genTiles() {
+        for (Tile tile : Vars.world.tiles) {
+            if (tile.build != null && tile.isCenter()) {
+
+                if (tile.build.block == Blocks.doorLarge) {
+                    doors.add(new Door(tile));
+                    tile.build.configure(true);
+                } else if (tile.build.block == Blocks.shockMine) {
+                    tile.build.kill();
+                    tile.setFloorNet(Blocks.darkPanel1);
+                }
+            }
         }
     }
 

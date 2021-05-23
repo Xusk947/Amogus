@@ -4,10 +4,12 @@ import Amogus.Game;
 import Amogus.MainX;
 import arc.graphics.Color;
 import arc.math.Mathf;
+import arc.math.geom.Ray;
 import arc.struct.Seq;
 import arc.util.Interval;
 import mindustry.Vars;
 import mindustry.content.Fx;
+import mindustry.core.World;
 import mindustry.gen.Call;
 import mindustry.gen.Nulls;
 import mindustry.gen.Player;
@@ -22,6 +24,7 @@ public abstract class PlayerData {
     public Player player;
     public boolean dead = false;
     public boolean hasVoted = false;
+    public float cx, cy, ctime; // click (x y)
     public int id;
     public int votes = 0;
 
@@ -54,8 +57,22 @@ public abstract class PlayerData {
                 }
             }
         }
+        // like holding xd for some tasks
+        if (player.unit() != null) {
+            if (player.unit().isShooting()) {
+                if (ctime <= 0) {
+                    cx = player.unit().aimX;
+                    cy = player.unit().aimY;
+                    ctime = 30;
+                } else {
+                    ctime = 30;
+                }
+            } else {
+                ctime -= 1;
+            }
+        }
     }
-    
+
     public void clear() {
         if (player.unit() != null) {
             Unit unit = player.unit();
