@@ -80,7 +80,7 @@ public class Level implements StateX {
 
         for (Player player : players) {
             Vars.netServer.sendWorldData(player);
-            if (imposters < 1 /* needImposters */ ) {
+            if (imposters < needImposters) {
                 datas.add(new Imposter(player));
                 imposters++;
             } else {

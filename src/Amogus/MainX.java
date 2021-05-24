@@ -57,6 +57,7 @@ public class MainX extends Plugin {
         Events.on(EventType.ServerLoadEvent.class, e -> {
             Core.app.removeListener(Vars.netServer);
             Vars.netServer = new XCoreNet();
+            Vars.netServer.admins.addChatFilter((player, message) -> null);
             Core.app.addListener(Vars.netServer);
             loadMaps();
             game.lobby.go();
@@ -66,8 +67,6 @@ public class MainX extends Plugin {
         Events.run(EventType.Trigger.update, () -> {
             game.update();
         });
-
-        Vars.netServer.admins.addChatFilter((player, message) -> null);
 
         Events.on(EventType.PlayerChatEvent.class, e -> {
             // Vote session because ClientComandHandler is Broken  lol
@@ -83,7 +82,7 @@ public class MainX extends Plugin {
                     } else if (!PlayerData.ALL.find(d -> d.player.id == e.player.id).dead) {
                         Call.sendMessage(e.player.con, "Can't find player with: " + s[1], "Amogus", Nulls.player);
                     } else {
-                        Call.sendMessage(e.player.con, "You [crimson]DED: " + s[1], "Amogus", Nulls.player);
+                        Call.sendMessage(e.player.con, "You [crimson]DED", "Amogus", Nulls.player);
 
                     }
                 }
@@ -140,7 +139,10 @@ public class MainX extends Plugin {
                     int tx = e.player.unit().tileX(), ty = e.player.unit().tileY();
                     if (tx >= e.tile.tileX() - 2 && ty >= e.tile.tileY() - 2 && tx <= e.tile.tileX() + 2 && ty <= e.tile.tileY() + 2) {
                         Call.label(e.player.con, "[accent]Task started", 1, task.tile.drawx(), task.tile.drawy());
-                        Crewmate.ALL.find(c -> c.player.id == e.player.id).currentTask = task.start();
+                        Crewmate crew = Crewmate.ALL.find(c -> c.player.id == e.player.id);
+                        if (!(crew.finished.contains(f -> f.build == e.tile))) {
+                            crew.currentTask = task.start();
+                        }
                     }
                 }
             }

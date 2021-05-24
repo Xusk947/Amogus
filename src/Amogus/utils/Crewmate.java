@@ -12,6 +12,7 @@ import mindustry.gen.Call;
 import mindustry.gen.Nulls;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
+import mindustry.world.Tile;
 
 public class Crewmate extends PlayerData {
 
@@ -19,10 +20,12 @@ public class Crewmate extends PlayerData {
 
     public Interval interval;
     public TaskX currentTask;
-    
+    public Seq<Tile> finished;
+
     public Crewmate(Player player) {
         super(player);
         interval = new Interval(1);
+        finished = new Seq<>();
         ALL.add(this);
     }
 
@@ -37,14 +40,17 @@ public class Crewmate extends PlayerData {
         super.update();
         if (interval.get(60f) && currentTask == null) {
             for (TaskX task : Game.ME.level.tasks) {
-                if (player.tileX() > task.tile.x - 5 && player.tileY() > task.tile.y - 5 && player.tileX() <= task.tile.x + 5 && player.tileY() <= task.tile.y + 5) {
-                    Call.effect(player.con, Fx.bubble, task.tile.drawx(), task.tile.drawy(), 0, Color.yellow);
+                if (finished.contains(t -> t == task.tile)) continue;
+                if (in(task, 5)) {
+                    Call.effect(player.con, Fx.dooropen, task.tile.drawx(), task.tile.drawy(), 0, Color.yellow);
                     break;
                 }
             }
         } else if (currentTask != null) {
             currentTask.update(this);
-            if (!dead || currentTask.tile.dst(player) > Vars.tilesize * 3) currentTask = null;
+            if (currentTask != null && !in(currentTask, 5)) {
+                currentTask = null;
+            }
         }
     }
 
@@ -58,5 +64,9 @@ public class Crewmate extends PlayerData {
             player.unit(Nulls.unit);
             Call.setRules(player.con, MainX.lobby);
         }
+    }
+
+    public boolean in(TaskX task, int dst) {
+        return player.unit().tileX() > task.tile.x - dst && player.unit().tileY() > task.tile.y - dst && player.unit().tileX() <= task.tile.x + dst && player.unit().tileY() <= task.tile.y + dst;
     }
 }

@@ -93,7 +93,7 @@ public class XCoreNet extends NetServer {
 
         for (Syncc entity : Groups.sync) {
             //write all entities now
-            if (player.unit() != null && entity instanceof Posc) {
+            if (!player.unit().isNull() && entity instanceof Posc) {
                 if (player.dst((Posc) entity) > tilesize * 8) {
                     continue;
                 } else {
