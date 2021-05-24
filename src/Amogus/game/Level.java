@@ -34,7 +34,7 @@ public class Level implements StateX {
 
     public Speed speed = Speed.NORMAL;
 
-    public boolean gameStarted = false;
+    public boolean gameStarted = false, ended = false;
     public boolean discussion = false;
 
     public int time = DISCUSSION_TIME;
@@ -58,12 +58,16 @@ public class Level implements StateX {
     public void go() {
         DeadBody.ALL = new Seq<>();
         Game.ME.state = Game.State.Game;
+        Imposter.ALL = new Seq<>();
+        Crewmate.ALL = new Seq<>();
+        PlayerData.ALL = new Seq<>();
         Seq<Player> players = new Seq<>();
         datas = new Seq<>();
         doors = new Seq<>();
         tasks = new Seq<>();
         discussion = false;
         gameStarted = false;
+        ended = false;
         time = DISCUSSION_TIME;
         Groups.player.copy(players);
         imposters = 0;
@@ -101,7 +105,7 @@ public class Level implements StateX {
 
     @Override
     public void update() {
-        if (gameStarted) {
+        if (gameStarted && !ended) {
             for (PlayerData data : datas) {
                 if (data.player.con != null && !discussion) {
                     cons(data);
@@ -117,6 +121,11 @@ public class Level implements StateX {
                         }
                     }
                 }
+            }
+            if (imposters >= Crewmate.ALL.size) {
+                endGame(true);
+            } else if (imposters <= 0) {
+                endGame(false);
             }
         }
     }
@@ -193,7 +202,6 @@ public class Level implements StateX {
                 if (data.votes > most.votes) {
                     most = data;
                 }
-                Log.info(data.votes + " : " + most.votes);
             }
             if (most.votes > skip) {
                 most.clear();
@@ -215,5 +223,26 @@ public class Level implements StateX {
 
     public void skip() {
         Call.sendMessage("[white]Skipped", "Amogus", Nulls.player);
+    }
+
+    public void endGame(boolean imposter) {
+        ended = true;
+        if (imposter) {
+            String t = "[white] |";
+            for (Imposter imposter1 : Imposter.ALL) {
+                t += " " + MainX.NAMES.get(imposter1.player.id);
+            }
+            Call.infoMessage("[red]Imposters" + t + "[gold] win!");
+        } else {
+            String t = "[white] |";
+            for (Crewmate crewmate : Crewmate.ALL) {
+                t += " " + MainX.NAMES.get(crewmate.player.id);
+            }
+            Call.infoMessage("[accent]Crewmates" + t + "[gold] win!");
+        }
+        
+        Timer.schedule(() -> {
+            Game.ME.lobby.go();
+        }, 3);
     }
 }

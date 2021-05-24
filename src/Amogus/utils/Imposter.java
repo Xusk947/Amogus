@@ -1,5 +1,6 @@
 package Amogus.utils;
 
+import Amogus.Game;
 import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.struct.Seq;
@@ -50,4 +51,12 @@ public class Imposter extends PlayerData {
             time = time - 1;
         }
     }
+
+    @Override
+    public void clear() {
+        super.clear();
+        Game.ME.level.imposters--;
+    }
+    
+    
 }
