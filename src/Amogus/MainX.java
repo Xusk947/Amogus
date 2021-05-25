@@ -53,6 +53,8 @@ public class MainX extends Plugin {
         lobby.lighting = false;
         lobby.unitDamageMultiplier = 0f;
         lobby.blockDamageMultiplier = 0f;
+        lobby.reactorExplosions = false;
+        lobby.canGameOver = false;
 
         Events.on(EventType.ServerLoadEvent.class, e -> {
             Core.app.removeListener(Vars.netServer);
@@ -78,6 +80,7 @@ public class MainX extends Plugin {
                         data.votes++;
                         Log.info(data.votes);
                         PlayerData.ALL.find(d -> d.player.id == e.player.id).hasVoted = true;
+                        Game.ME.level.voted++;
                         Call.sendMessage("[white] vote to: " + NAMES.get(data.player.id) + " [#" + Team.get(data.id).color.toString() + "]" + data.id, NAMES.get(e.player.id) + " [#" + Team.get(e.player.team().id).color.toString() + "]" + e.player.team().id, Nulls.player);
                     } else if (!PlayerData.ALL.find(d -> d.player.id == e.player.id).dead) {
                         Call.sendMessage(e.player.con, "Can't find player with: " + s[1], "Amogus", Nulls.player);

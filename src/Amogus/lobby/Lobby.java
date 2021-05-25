@@ -9,19 +9,23 @@ import arc.struct.Seq;
 import arc.util.Interval;
 import arc.util.Time;
 import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.UnitTypes;
 import mindustry.game.Team;
+import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
+import mindustry.gen.PayloadUnit;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.type.UnitType;
+import mindustry.world.blocks.payloads.BuildPayload;
 
 public class Lobby implements StateX {
     public static final UnitType[] types = new UnitType[]{UnitTypes.mega, UnitTypes.mono, UnitTypes.bryde, UnitTypes.risso, UnitTypes.toxopid, UnitTypes.quad, UnitTypes.poly, UnitTypes.reign};
     public final float SEC = 60f;
-    public final float TIME = 60f * 60f;
+    public final float TIME = 60f * 5f;
     public final int MIN_PLAYER = 1;
 
     public float time = 60 * 30f;
@@ -47,7 +51,9 @@ public class Lobby implements StateX {
         for (Player player : Groups.player) {
             if (player.unit() != null) {
                 if (player.unit().type == UnitTypes.beta && player.unit().spawnedByCore) {
-                    Unit u = UnitTypes.flare.spawn(player.x, player.y);
+                    Unit u = UnitTypes.mega.spawn(player.x, player.y);
+                    PayloadUnit p = (PayloadUnit) u;
+                    p.addPayload(new BuildPayload(Blocks.thoriumReactor, Team.sharded));
                     u.type(types[Mathf.random(types.length - 1)]);
                     u.spawnedByCore = true;
                     player.unit(u);
@@ -68,7 +74,7 @@ public class Lobby implements StateX {
         Call.worldDataBegin();
         Vars.world.loadMap(Vars.maps.byName("ship"));
         Vars.state.rules = MainX.lobby.copy();
-
+        
         Vars.logic.play();
 
         for (Player player : players) {

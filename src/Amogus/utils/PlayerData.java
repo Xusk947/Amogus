@@ -22,6 +22,7 @@ public abstract class PlayerData {
 
     public final String name;
     public Player player;
+    public Unit unit;
     public boolean dead = false;
     public boolean hasVoted = false;
     public float cx, cy, ctime; // click (x y)
@@ -70,6 +71,8 @@ public abstract class PlayerData {
             } else {
                 ctime -= 1;
             }
+        } else if (unit != null) {
+            player.unit(unit);
         }
     }
 

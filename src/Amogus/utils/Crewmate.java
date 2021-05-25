@@ -57,11 +57,12 @@ public class Crewmate extends PlayerData {
     public void kill() {
         if (player.unit() != null) {
             new DeadBody(player.x, player.y, this);
-            Unit unit = player.unit();
+            Unit un = player.unit();
             player.clearUnit();
-            unit.set(0, 0);
-            unit.kill();
+            un.set(0, 0);
+            un.kill();
             player.unit(Nulls.unit);
+            unit = null;
             Call.setRules(player.con, MainX.lobby);
         }
     }

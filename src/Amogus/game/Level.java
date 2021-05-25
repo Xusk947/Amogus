@@ -4,6 +4,7 @@ import Amogus.Game;
 import Amogus.MainX;
 import Amogus.process.Door;
 import Amogus.process.TaskX;
+import Amogus.process.Trapdoor;
 import Amogus.utils.Crewmate;
 import Amogus.utils.DeadBody;
 import Amogus.utils.Imposter;
@@ -24,6 +25,7 @@ import mindustry.gen.Nulls;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.world.Tile;
+import mindustry.world.blocks.environment.Floor;
 
 public class Level implements StateX {
 
@@ -41,10 +43,12 @@ public class Level implements StateX {
 
     public int needImposters = 1;
     public int imposters = 0;
+    public int voted = 0;
 
     public Seq<PlayerData> datas;
     public Seq<Door> doors;
     public Seq<TaskX> tasks;
+    public Seq<Trapdoor> traps;
 
     public int skip = 0;
 
@@ -56,34 +60,43 @@ public class Level implements StateX {
 
     @Override
     public void go() {
-        DeadBody.ALL = new Seq<>();
         Game.ME.state = Game.State.Game;
+
+        DeadBody.ALL = new Seq<>();
         Imposter.ALL = new Seq<>();
         Crewmate.ALL = new Seq<>();
         PlayerData.ALL = new Seq<>();
-        Seq<Player> players = new Seq<>();
+
         datas = new Seq<>();
         doors = new Seq<>();
         tasks = new Seq<>();
+        traps = new Seq<>();
+
         discussion = false;
         gameStarted = false;
         ended = false;
+
         time = DISCUSSION_TIME;
-        Groups.player.copy(players);
         imposters = 0;
+
+        Seq<Player> players = new Seq<>();
+        Groups.player.copy(players);
         players.shuffle();
 
         Vars.logic.reset();
 
         Call.worldDataBegin();
+
         Vars.world.loadMap(Vars.maps.byName(name));
         genTiles();
+
         Vars.state.rules = MainX.rules.copy();
 
         Vars.logic.play();
 
         for (Player player : players) {
             Vars.netServer.sendWorldData(player);
+
             if (imposters < needImposters) {
                 datas.add(new Imposter(player));
                 imposters++;
@@ -92,6 +105,7 @@ public class Level implements StateX {
             }
             player.team(Team.get(TEAM_ID));
             TEAM_ID++;
+
             if (TEAM_ID > 200) {
                 TEAM_ID = 65;
             }
@@ -118,15 +132,17 @@ public class Level implements StateX {
                         Call.setHudText("[accent][ DISCUSSION " + Math.floor(time) + " ]");
                         if (time < 1) {
                             endDiscussion();
+                        } else if (voted == datas.size) {
+                            endDiscussion();
                         }
                     }
                 }
             }
-            if (imposters >= Crewmate.ALL.size) {
-                endGame(true);
-            } else if (imposters <= 0) {
-                endGame(false);
-            }
+//            if (imposters >= Crewmate.ALL.size) {
+//                endGame(true);
+//            } else if (imposters <= 0) {
+//                endGame(false);
+//            }
         }
     }
 
@@ -140,6 +156,9 @@ public class Level implements StateX {
     public void imposterCons(Imposter imposter) {
         for (Door door : doors) {
             door.update(imposter);
+        }
+        for (Trapdoor trap : traps) {
+            trap.update(imposter);
         }
     }
 
@@ -155,6 +174,7 @@ public class Level implements StateX {
                 }
                 unit.ammo = 0;
                 data.player.unit(unit);
+                data.unit = unit;
                 data.id = data.player.team().id;
             }
         }
@@ -189,10 +209,15 @@ public class Level implements StateX {
                     tile.build.configure(true);
                 } else if (tile.build.block == Blocks.shockMine) {
                     tile.build.kill();
+                    traps.add(new Trapdoor(tile));
                     tile.setFloorNet(Blocks.darkPanel1);
                 }
             }
         }
+        Vars.world.tile(0, 0).setFloorNet(Blocks.stone);
+        Vars.world.tile(1, 0).setFloorNet(Blocks.stone);
+        Vars.world.tile(0, 1).setFloorNet(Blocks.stone);
+        Vars.world.tile(1, 1).setFloorNet(Blocks.stone);
     }
 
     public void endDiscussion() {
@@ -218,6 +243,8 @@ public class Level implements StateX {
         time = DISCUSSION_TIME;
         discussion = false;
         configDoors(true);
+
+        voted = 0;
         skip = 0;
     }
 
@@ -240,9 +267,13 @@ public class Level implements StateX {
             }
             Call.infoMessage("[accent]Crewmates" + t + "[gold] win!");
         }
-        
+
         Timer.schedule(() -> {
             Game.ME.lobby.go();
         }, 3);
+    }
+    
+    void connect(int x1, int y1, int x2, int y2) {
+        traps.find(t -> (t.tile.x == x1 && t.tile.y == y1)).connect(traps.find(t -> (t.tile.x == x2 && t.tile.y == y2)));
     }
 }
