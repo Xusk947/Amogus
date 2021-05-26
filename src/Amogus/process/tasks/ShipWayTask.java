@@ -30,21 +30,24 @@ public class ShipWayTask extends TaskX {
     @Override
     public void update(Crewmate data) {
         if (time <= 0) {
-            time = 30;
+            time = 15;
             for (Dot way : ways) {
                 Call.effect(data.player.con, Fx.freezing, way.x, way.y, 0, Color.clear);
-            }
-            if (current < ways.size && ways.get(current).in(data.player.mouseX, data.player.mouseY, 12)) {
-                current++;
-            }
-            ways.get(current);
-            if (current > 0) {
-                for (int i = 0; i < current; i++) {
-                    if (current > ways.size - 1) return;
-                    Dot way0 = ways.get(i);
-                    Dot way1 = ways.get(i - 1);
-                    M.line(way0.x, way0.y, way1.x, way1.y, (x, y) -> {
-                        if (x % 10 <= 0) {
+                int index = ways.indexOf(way);
+                if (index == current) {
+                    M.line(way.x, way.y, data.player.mouseX, data.player.mouseY, (x, y) -> {
+                        if (x % 7 <= 0) {
+                            Call.effect(data.player.con, Fx.pointHit, x, y, 0, Color.gray);
+                        }
+                    });
+                    if (current < ways.size - 1 && ways.get(index + 1).in(data.player.mouseX, data.player.mouseY, 0.8f)) {
+                        current++;
+                    }
+                }
+                if (index < current) {
+                    Dot way1 = ways.get(index + 1);
+                    M.line(way.x, way.y, way1.x, way1.y, (x, y) -> {
+                        if (x % 5 <= 0) {
                             Call.effect(Fx.freezing, x, y, 0, Color.clear);
                         }
                     });

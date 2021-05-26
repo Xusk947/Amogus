@@ -10,8 +10,8 @@ public class Dot {
         this.y = y;
     }
     
-    public boolean in(float x1, float y1, int dst) {
-        int t = dst * Vars.tilesize;
+    public boolean in(float x1, float y1, float dst) {
+        float t = dst * Vars.tilesize;
         return x1 > x - t && x1 < x + t && y1 > y - t && y1 < y + t;
     }
 }

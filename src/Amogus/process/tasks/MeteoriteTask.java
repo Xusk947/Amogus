@@ -7,7 +7,9 @@ import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.struct.Seq;
 import mindustry.Vars;
+import mindustry.content.Bullets;
 import mindustry.content.Fx;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.world.Tile;
 
@@ -17,7 +19,7 @@ public class MeteoriteTask extends TaskX {
 
     public MeteoriteTask(Tile tile) {
         super(tile);
-        meteorites = new Seq();
+        meteorites = new Seq<>();
         for (int i = 0; i < Mathf.random(7, 15); i++) {
             meteorites.add(new Dot(tile.drawx() + Mathf.random(-Vars.tilesize * 3.5f, Vars.tilesize * 3.5f), tile.drawy() + Mathf.random(-Vars.tilesize * 3.5f, Vars.tilesize * 3.5f)));
         }
@@ -25,12 +27,12 @@ public class MeteoriteTask extends TaskX {
 
     @Override
     public void update(Crewmate data) {
-        if (data.player.unit().isShooting) {
-            for (Dot meteorite : meteorites) {
-                if (meteorite.in(data.cx, data.cy, Vars.tilesize)) {
-                    Call.effect(data.player.con, Fx.explosion, meteorite.x, meteorite.y, 0, Color.clear);
-                    meteorites.remove(meteorite);
-                }
+        for (Dot meteorite : meteorites) {
+            Call.effect(data.player.con, Fx.pointHit, meteorite.x, meteorite.y, 0, Color.gray);
+            if (meteorite.in(data.cx, data.cy, 0.8f)) {
+                Call.effect(data.player.con, Fx.explosion, meteorite.x, meteorite.y, 0, Color.clear);
+                Call.createBullet(Bullets.flakLead, Team.derelict, tile.drawx(), tile.drawy(), 0, 0, 1, 10);
+                meteorites.remove(meteorite);
             }
         }
         if (meteorites.isEmpty()) {

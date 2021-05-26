@@ -15,16 +15,12 @@ import mindustry.world.Tile;
 
 public class WirelessTask extends TaskX {
     
-    public static int ID = 0;
-    int id = 0;
     float timer = 0;
 
     Con[] connections;
 
     public WirelessTask(Tile tile) {
         super(tile);
-        id = ID;
-        ID++;
         this.connections = new Con[4];
 
         IntSeq se = new IntSeq(new int[]{0, 1, 2, 3});
@@ -40,7 +36,6 @@ public class WirelessTask extends TaskX {
     @Override
     public void update(Crewmate data) {
         if (timer < 0) {
-            Log.info(id);
             M.line(data.cx, data.cy, data.player.mouseX, data.player.mouseY, (x, y) -> {
                 if (x % 10 <= 0) {
                     Call.effect(data.player.con, Fx.pointHit, x, y, 0, Color.gray);

@@ -27,18 +27,18 @@ public class GarbageTask extends TaskX {
     @Override
     public void update(Crewmate data) {
         if (sended && timer % 2 <= 0) {
-            Call.effect(Fx.bubble, tile.drawx() + Mathf.random(-16, 16), tile.drawy() + Mathf.random(-16, 16), Mathf.random(360), Color.forest);
+            Call.effect(data.player.con, Fx.nuclearsmoke, tile.drawx() + Mathf.random(-12, 12), tile.drawy() + Mathf.random(-12, 12), Mathf.random(360), Color.forest);
         }
         if (timer < 0) {
-            timer = 60;
+            timer = 15;
             Call.effect(data.player.con, Fx.pointHit, from.x, from.y, 0, Color.red);
             Call.effect(data.player.con, Fx.pointHit, to.x, to.y, 0, Color.yellow);
             M.line(data.cx, data.cy, data.player.mouseX, data.player.mouseY, (x, y) -> {
-                if (x % 10 <= 0) {
+                if (y % 5 <= 0) {
                     Call.effect(data.player.con, Fx.pointHit, x, y, 0, Color.gray);
                 }
             });
-            if (!sended && from.in(data.cx, data.cy, 16) && to.in(data.player.mouseX, data.player.mouseY, 16)) {
+            if (!sended && from.in(data.cx, data.cy, 0.8f) && to.in(data.player.mouseX, data.player.mouseY, 0.8f)) {
                 Timer.schedule(() -> {
                     onFinish(data);
                 }, 2);

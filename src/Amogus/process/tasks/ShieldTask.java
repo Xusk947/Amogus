@@ -29,7 +29,7 @@ public class ShieldTask extends TaskX {
 
         for (int i = 0; i < Mathf.random(1, 3); i++) {
             cells.shuffle();
-            cells.get(0).enabled = true;
+            cells.get(0).enabled = false;
         }
     }
 
@@ -38,13 +38,16 @@ public class ShieldTask extends TaskX {
         if (time <= 0) {
             time = 30;
             for (Cell cell : cells) {
-                if (!cell.enabled && cell.p.in(data.cx, data.cy, 12)) {
+                if (!cell.enabled && cell.p.in(data.cx, data.cy, 0.75f)) {
                     cell.enabled = true;
                 }
                 Call.effect(data.player.con, Fx.pointHit, cell.p.x, cell.p.y, 0, cell.enabled ? Color.lime : Color.crimson);
             }
         } else {
             time -= 1;
+        }
+        if (cells.count(c -> !c.enabled) <= 0) {
+            onFinish(data);
         }
     }
 
