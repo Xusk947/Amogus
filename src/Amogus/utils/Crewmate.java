@@ -6,7 +6,6 @@ import Amogus.process.TaskX;
 import arc.graphics.Color;
 import arc.struct.Seq;
 import arc.util.Interval;
-import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.gen.Call;
 import mindustry.gen.Nulls;

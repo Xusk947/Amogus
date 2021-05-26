@@ -22,6 +22,12 @@ public abstract class TaskX {
         Call.label(data.player.con, "[lime]Finished!", 3, tile.drawx(), tile.drawy());
     };
 
+    public void resc(Crewmate data) {
+        data.cx = 0;
+        data.cy = 0;
+        data.ctime = 0;
+    }
+        
     public abstract TaskX start();
     
 }

@@ -18,6 +18,10 @@ public class Rect {
     }
     
     public boolean in(int x, int y) {
-        return this.x > x && this.y > y && this.x < endX && this.y < endY;
+        return x >= this.x && y >= this.y && x <= endX && y <= endY;
     }
+    
+        public boolean in(int x, int y, int size) {
+            return x >= this.x - size && y >= this.y - size && x <= this.x + size && y <= this.y + size;
+        }
 }

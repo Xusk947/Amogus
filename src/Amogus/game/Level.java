@@ -1,5 +1,6 @@
 package Amogus.game;
 
+import Amogus.Config;
 import Amogus.Game;
 import Amogus.MainX;
 import Amogus.process.Door;
@@ -29,17 +30,14 @@ import mindustry.world.blocks.environment.Floor;
 
 public class Level implements StateX {
 
-    public final int DISCUSSION_TIME = 30;
     public int TEAM_ID = 65;
 
     public String name;
 
-    public Speed speed = Speed.NORMAL;
-
     public boolean gameStarted = false, ended = false;
     public boolean discussion = false;
 
-    public int time = DISCUSSION_TIME;
+    public int time = Config.DISCUSSION_TIME;
 
     public int needImposters = 1;
     public int imposters = 0;
@@ -76,7 +74,7 @@ public class Level implements StateX {
         gameStarted = false;
         ended = false;
 
-        time = DISCUSSION_TIME;
+        time = Config.DISCUSSION_TIME;
         imposters = 0;
 
         Seq<Player> players = new Seq<>();
@@ -97,7 +95,7 @@ public class Level implements StateX {
         for (Player player : players) {
             Vars.netServer.sendWorldData(player);
 
-            if (imposters < needImposters) {
+            if (imposters > needImposters) {
                 datas.add(new Imposter(player));
                 imposters++;
             } else {
@@ -166,10 +164,10 @@ public class Level implements StateX {
         for (PlayerData data : datas) {
             if (Team.sharded.core() != null) {
                 Unit unit = Nulls.unit;
-                if (speed == Speed.FAST) {
+                if (Config.speed == Speed.FAST) {
                     unit = UnitTypes.dagger.spawn(Team.sharded, Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4);
                     unit.type = UnitTypes.flare;
-                } else if (speed == Speed.NORMAL) {
+                } else if (Config.speed == Speed.NORMAL) {
                     unit = UnitTypes.crawler.spawn(Team.sharded, Team.sharded.core().x, Team.sharded.core().y + Vars.tilesize * 4);
                 }
                 unit.ammo = 0;
@@ -240,7 +238,7 @@ public class Level implements StateX {
             }
         }
         Call.hideHudText();
-        time = DISCUSSION_TIME;
+        time = Config.DISCUSSION_TIME;
         discussion = false;
         configDoors(true);
 

@@ -31,7 +31,7 @@ public class Trapdoor {
             if (interval.get(0, 60f)) {
                 Call.effect(imp.player.con, Fx.bubble, tile.drawx(), tile.drawy(), 0, Color.crimson);
             }
-            if (imp.player.unit().isShooting() && imp.player.unit().aimX > tile.drawx() - 8 && imp.player.unit().aimX < tile.drawx() + 8 && imp.player.unit().aimY > tile.drawy() - 8 && imp.player.unit().aimY < tile.drawy() + 8) {
+            if (imp.player.unit().isShooting() && imp.player.unit().aimX > tile.drawx() - 12 && imp.player.unit().aimX < tile.drawx() + 12 && imp.player.unit().aimY > tile.drawy() - 12 && imp.player.unit().aimY < tile.drawy() + 12) {
                 imp.in = this;
                 imp.transfer(4, 4);
                 Call.setRules(imp.player.con, MainX.lobby);

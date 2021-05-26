@@ -140,12 +140,9 @@ public class MainX extends Plugin {
                     Log.info(e.tile.tileX() + " : " + e.tile.tileY());
                     TaskX task = Game.ME.level.tasks.find(t -> t.tile.build.equals(e.tile));
                     int tx = e.player.unit().tileX(), ty = e.player.unit().tileY();
-                    if (tx >= e.tile.tileX() - 2 && ty >= e.tile.tileY() - 2 && tx <= e.tile.tileX() + 2 && ty <= e.tile.tileY() + 2) {
+                    if (!Crewmate.ALL.find(c -> c.player.id == e.player.id).finished.contains(t -> t.build.equals(e.tile)) && tx >= e.tile.tileX() - 2 && ty >= e.tile.tileY() - 2 && tx <= e.tile.tileX() + 2 && ty <= e.tile.tileY() + 2) {
                         Call.label(e.player.con, "[accent]Task started", 1, task.tile.drawx(), task.tile.drawy());
-                        Crewmate crew = Crewmate.ALL.find(c -> c.player.id == e.player.id);
-                        if (!(crew.finished.contains(f -> f.build == e.tile))) {
-                            crew.currentTask = task.start();
-                        }
+                        Crewmate.ALL.find(c -> c.player.id == e.player.id).currentTask = task.start();
                     }
                 }
             }

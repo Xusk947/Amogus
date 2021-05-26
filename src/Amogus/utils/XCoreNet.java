@@ -96,7 +96,7 @@ public class XCoreNet extends NetServer {
                 if (player.dst((Posc) entity) > tilesize * 8) {
                     continue;
                 } else {
-                    if (M.ray(((Posc) entity).x(), ((Posc) entity).y(), player.unit().x, player.unit().y)) {
+                    if (M.ray(((Posc) entity).tileX(), ((Posc) entity).tileY(), player.unit().tileX(), player.unit().tileY())) {
                         continue;
                     }
                 }
